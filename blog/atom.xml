@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://distris.github.io/ExtendedCS/blog</id>
-    <title>ExtendedCS: a better C# compiler for Unity and beyond Blog</title>
+    <title>ExtendedCS - a better C# compiler for Unity and beyond Blog</title>
     <updated>2021-08-26T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://distris.github.io/ExtendedCS/blog"/>
-    <subtitle>ExtendedCS: a better C# compiler for Unity and beyond Blog</subtitle>
+    <subtitle>ExtendedCS - a better C# compiler for Unity and beyond Blog</subtitle>
     <icon>https://distris.github.io/ExtendedCS/img/favicon.ico</icon>
     <entry>
         <title type="html"><![CDATA[Welcome]]></title>
