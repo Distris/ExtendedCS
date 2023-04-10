@@ -5,23 +5,24 @@ const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 const discordLink = "https://discord.gg/G3gMzSVD3k";
+const projectName = "ExtendedCS";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'ExtensibleCS: a better C# compiler for Unity and beyond',
+  title: 'ExtendedCS: a better C# compiler for Unity and beyond',
   tagline: 'Customizable Records, Implicits, Additive and Transformational Macros and more',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://distris.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: `/${projectName}`,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'distris', // Usually your GitHub org/user name.
-  projectName: 'extensiblecs', // Usually your repo name.
+  projectName: projectName, // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
@@ -66,7 +67,7 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: 'ExtensibleCS',
+        title: 'ExtendedCS',
         // logo: {
         //   alt: 'ExtensibleCS Logo',
         //   src: 'img/logo.svg',
