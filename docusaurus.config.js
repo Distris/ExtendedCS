@@ -9,8 +9,8 @@ const projectName = "ExtendedCS";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'ExtendedCS: a better C# compiler for Unity and beyond',
-  tagline: 'Customizable Records, Implicits, Additive and Transformational Macros and more',
+  title: 'ExtendedCS - a better C# compiler for Unity and beyond',
+  tagline: 'Customizable Records, Implicits, Generational and Transformational Macros, and more',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -97,11 +97,11 @@ const config = {
         style: 'dark',
         links: [
           // {
-          //   title: 'Docs',
+          //   title: 'More',
           //   items: [
           //     {
-          //       label: 'Tutorial',
-          //       to: '/docs/intro',
+          //       label: 'Source Code',
+          //       to: 'https://github.com/Distris/ExtendedCS',
           //     },
           //   ],
           // },
