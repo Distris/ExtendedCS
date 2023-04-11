@@ -10,13 +10,13 @@ Our compiler can do two things:
 
 ## Code Generation
 
-Code generation is a process when additional code is added to the source code when compiling. These could be new classes, structs or functions. For example, [`[Record]`](./capabilities/records.md) attribute generates extra code, but does not touch existing code.
+Code generation is a process when additional code is added to the source code when compiling. These could be new classes, structs or functions. For example, [`[Record]`](../capabilities/records.md) attribute generates extra code, but does not touch existing code.
 
 This is done by generating `*.partials.cs` files which contain:
 - `partial` definitions of `class`es and `struct`s containing extra functions and types.
 - standalone types, such as compiler-generated `enum`s.
 
-![Example generated partial file](../static/img/partials.png)
+![Example generated partial file](./partials.png)
 
 :::info
 The generated files are stored in `generated-by-compiler/CS_PROJECT_NAME/partials/` directory.
@@ -30,9 +30,9 @@ The process looks like this:
 
 ## Code Transformation
 
-Meanwhile code transformation is a process where existing code gets rewritten. See [`[LazyProperty]`](./capabilities/lazy-property.md) for an example.
+Meanwhile code transformation is a process where existing code gets rewritten. See [`[LazyProperty]`](../capabilities/lazy-property.md) for an example.
 
-![Example transformed file](../static/img/transformed.png)
+![Example transformed file](./transformed.png)
 
 :::info
 The generated files are stored in `generated-by-compiler/CS_PROJECT_NAME/macros/` directory.
