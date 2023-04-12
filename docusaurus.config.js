@@ -80,6 +80,11 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
+          {
+            href: 'https://forms.gle/FhTyufPHK9nu4Bkk8',
+            position: 'left',
+            label: 'Download',
+          },
           // {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: discordLink,
