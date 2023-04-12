@@ -108,10 +108,6 @@ Implicits have to rewrite your code, thus you will end up with a `.transformed.c
 See [code transformation](../../generation-and-transformation/index.md) for more information.
 :::
 
-### Implicit Derivation
-
-TODO
-
 ### Implicit Hinting
 
 If you are using an IDE that supports compiler hints, the IDE will show you a hint with the information of how the implicit was resolved without the need of recompile.
@@ -120,4 +116,27 @@ If you are using an IDE that supports compiler hints, the IDE will show you a hi
 
 ## ImplicitPassThrough
 
-TODO
+If your function itself does not use the implicit, but you just have to pass it to other invoked functions, instead of specifying the implicits manually, you can use the `[ImplitictPassThrough]` attribute.
+
+For example, this code:
+```cs
+void Run2([Implicit] Numeric<int> numeric = default) {
+  /* ... */
+}
+
+[ImplicitPassThrough]
+void Run1() {
+  Run2();
+}
+```
+
+Will get transformed to:
+```cs
+void Run2([Implicit] Numeric<int> numeric = default) {
+}
+
+[ImplicitPassThrough]
+void Run1([GenerationAttributes.Implicit] Numeric<int> _implicit_Numeric_Int32 = default) {
+  Run2(numeric: _implicit_Numeric_Int32);
+}
+```
