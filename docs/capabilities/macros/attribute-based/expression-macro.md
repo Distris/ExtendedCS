@@ -101,7 +101,7 @@ These parameters (accessible via the `{{ parameter }}` syntax) are exported to t
 
 ### Functions
 
-- `inline(string functionName, string[] args...)` - inlines a lamba function from the argument named `functionName`.
+- `inline(string functionName, string[] args...)` - inlines an anonymous function from the argument named `functionName`.
 
   Example:
   ```cs
