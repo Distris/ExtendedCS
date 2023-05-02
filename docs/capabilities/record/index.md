@@ -1,7 +1,3 @@
----
-sidebar_position: 0
----
-
 # Record
 
 C# 9 introduced [record types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) into the language, while C# 10 added support for struct records as well.
@@ -299,5 +295,5 @@ There are 3 settings that can toggle generation of different parts of code:
   :::
 
 :::tip
-If you find yourself setting all three of these to `false`, check out the [`[GenConstructor]`](gen-constructor.md) attribute.
+If you find yourself setting all three of these to `false`, check out the [`[GenConstructor]`](../gen-constructor.md) attribute.
 :::

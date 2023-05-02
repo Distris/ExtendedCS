@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # GenConstructor
 
-`[GenConstructor]` is a weaker case of [`[Record]`](records.md).
+`[GenConstructor]` allows you to use the constructor generation facilities of [`[Record]`](./record/index.md) on any type.
 
 ```cs
 using GenerationAttributes;
@@ -19,7 +19,11 @@ It generates the specified constructors for the type, without generating `Equals
 
 Therefore, it is essential equal to this declaration:
 ```cs
-[Record(GenerateEquality = false, GenerateGetHashCode = false, GenerateToString = false)]
+[Record(
+  GenerateEquality = false, 
+  GenerateGetHashCode = false, 
+  GenerateToString = false
+)]
 ```
 
 :::tip

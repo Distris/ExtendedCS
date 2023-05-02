@@ -1,7 +1,7 @@
 # Macros
 
 Macros are programs that are ran during the compilation. These programs get access to the source code that is being compiled and can do anything that a regular program does. They can:
-- Generate new code based on existing code (like [`[Record]`](../records.md) does).
+- Generate new code based on existing code (like [`[Record]`](../record/index.md) does).
 - Change the existing code (like [`[LazyProperty]`](../lazy-property.md) does).
 - Validate the existing code. For example, you could validate the SQL queries being compiled by connecting to the database and checking them against the database schema.
 - Anything else, really.
@@ -14,8 +14,8 @@ C# introduced their own version of macros called [source generators](https://lea
 ## Macro Types
 
 We provide support for three types of macros:
-- [Attribute based macros](./attribute-based/index.md) - these are the simplest macros which you can use by just attaching an attribute to a type or a function.
-- Scriban based macros - middle ground between ability and complexity.
+- [Attribute based macros](./attribute-based/index.md) - these are the simplest macros which you can use by just attaching an attribute to a type or a function. They typically do one thing only.
+- [Scriban based macros] - middle ground between ability and complexity.
 - C# based macros - the most complex and most powerful version of the macros.
 
 :::note
