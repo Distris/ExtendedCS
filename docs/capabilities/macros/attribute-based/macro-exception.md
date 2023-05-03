@@ -14,16 +14,20 @@ using GenerationAttributes;
 
 public static class AnyExts {
   [ExpressionMacro(@"...replaced code...")]
-  public static string macroFunction<A>(this A a) => throw new MacroException();
+  public static string MacroFunction<A>(this A a) => throw new MacroException();
+}
+
+void UseMacroFunction() {
+  var str = foo.MacroFunction();
 }
 ```
 
 Will become:
 
 ```cs
-using GenerationAttributes;
-
-public static class AnyExts {
-  public static string macroFunction<A>(this A a) => ...replaced code...;
+void UseMacroFunction() {
+  var str = ...replaced code...;
 }
 ```
+
+Thus `MacroException` will never be thrown.
