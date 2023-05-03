@@ -1,12 +1,23 @@
 ---
-sidebar_position: 6
+sidebar_position: 4
 ---
 
 # Exhaustive Matching
 
 In modern languages like [Scala](https://docs.scala-lang.org/scala3/reference/enums/adts.html), [Rust](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html), [Kotlin](https://kotlinlang.org/docs/sealed-classes.html) or [F#](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions), it is trivial to declare discriminated unions, also known as [algebraic data types (ADTs)](https://jrsinclair.com/articles/2019/algebraic-data-types-what-i-wish-someone-had-explained-about-functional-programming/).
 
-C# does not have this built in, however you can represent them using existing C# constructs: enumerations, `abtract class + classes` or `interface + classes`.
+:::info
+If you are not familiar with ADTs, in a nutshell they are a way to express in your code that "this data can only take one of fixed number of forms".
+
+For example, an item in a video game could be represented as one of:
+- Melee weapon with these properties: damage, time between attacks.
+- Ranged weapon with these properties: damage, maximum range, time between attacks.
+- Healing kit with these properties: hit points healed, time to heal, charges left.
+
+The idea is to have different code paths dealing with each case of the `Item` ADT. In our case, the melee weapon, ranged weapon or healing kit items require different code to handle them, as the items are very different.
+:::
+
+C# does not have ADTs built in, however you can represent them using existing C# constructs: enumerations, `abtract class + classes` or `interface + classes`.
 
 Lets take a look at each implementation:
 
@@ -64,7 +75,7 @@ When should each representation be used?
 
 ## Exhaustive Matching
 
-Exhaustive matching is an idea that all variants of your ADT are declared in your source code and therefore, when you receive a `MyADT` as a function parameter, it can only be in one of N forms (in our case `N` is `3`: `Case1, Case2, Case3`).
+Exhaustive matching is an idea that all variants of your ADT are declared in your source code and therefore, when you receive a `MyADT` as a function parameter, it can only be in one of N forms (in our case `N` is `3`: `Case1`,  `Case2` or `Case3`).
 
 Lets take a look how it looks in practice:
 
@@ -88,7 +99,7 @@ int UseMyClassADT(MyADT adt) =>
   };
 ```
 
-What happens when we decide to add `Case4` to our ADT later down the line? Well, in standard C# - not much. The compiler will not help you and instead you will start getting exceptions from the functions when they will receive the `Case4`.
+What happens when we decide to add `Case4` to our ADT later down the line? Well, in standard C# - not much. The compiler will not help you and instead you will start getting runtime exceptions from the functions when they will receive the `Case4`.
 
 Ideally, after adding `Case4`, we would want the compiler to point us to all the places in the code where ADT cases are being checked and raise a compile-time error where this checking is non-exhaustive (not checking all of the possible cases).
 
@@ -96,6 +107,7 @@ To achieve that, there are two solutions:
 1. [`ExhaustiveMatching` Roslyn analyzer plugin from `WalkerCodeRanger`](https://github.com/WalkerCodeRanger/ExhaustiveMatching).
 
   This relies on existing C# `switch` syntax to perform exhaustive checking and you still need to write the `default` case that does `throw ExhaustiveMatch.Failed(value)`.
+
 2. Use the `[Matcher]` attribute from our compiler, which generates code using inlined anonymous functions.
 
 ### `[Matcher]`
@@ -147,6 +159,58 @@ int UseMyEnumADT(MyADT adt) {
 }
 ```
 
+Both `match` and `voidMatch` are [inlined](./macros/inlining.md), thus when you use them the code gets transformed to this:
+```cs
+int UseMyEnumADT(MyADT adt) {
+  // Just run some code based on the case.
+  if (adt == MyADT.Case1) {
+    Console.WriteLine("Case1, yeah!");
+  }
+  else if (adt == MyADT.Case2) {
+    Console.WriteLine("Got Case 2.");
+  }
+  else if (adt == MyADT.Case3) {
+    Console.WriteLine("Case 3 in the house!");
+  }
+  else {
+    // This should never be reachable, unless you do something like:
+    // `UseMyEnumADT((MyADT) 10000)`, which defeats the whole purpose of 
+    // exhaustive matching.
+    throw new System.ArgumentOutOfRangeException(
+      "adt", adt, "Unknown value"
+    );
+  }
+
+  // Return a value based on the case.
+  if (adt == MyADT.Case1) {
+    return 1;
+  }
+  else if (adt == MyADT.Case2) {
+    return 2;
+  }
+  else if (adt == MyADT.Case3) {
+    return 3;
+  }
+  else {
+    throw new System.ArgumentOutOfRangeException(
+      "adt", adt, "Unknown value"
+    );
+  }
+}
+```
+
+What happens when you add `Case4` to the ADT while using `[Matcher]`? In that case the compiler will regenerate the `match` and `voidMatch` functions, adding the `case4` parameter to each of them and you will be forced to add handling for those cases in the appropriate call-sites.
+
+Therefore, using `[Matcher]` allows us to succinctly write code that checks all cases of our ADT and not worry about breaking the code when refactoring in the future.
+
 ### `[MatcherFor]`
 
-TODO
+This is similar to `[Matcher]`, however it is for generating the `match` and `voidMatch` functions for enums and class hierarchies you do not control.
+
+The usage is simple:
+```cs
+[MatcherFor(typeof(MyADT))]
+public static partial class MyADTExtensions {}
+```
+
+The `match` and `voidMatch` functions will be added into the `MyADTExtensions` class.
