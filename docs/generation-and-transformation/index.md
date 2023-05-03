@@ -10,7 +10,7 @@ Our compiler can do two things:
 
 ## Code Generation
 
-Code generation is a process when additional code is added to the source code when compiling. These could be new classes, structs or functions. For example, [`[Record]`](../capabilities/records.md) attribute generates extra code, but does not touch existing code.
+Code generation is a process when additional code is added to the source code when compiling. These could be new classes, structs or functions. For example, [`[Record]`](../capabilities/record/index.md) attribute generates extra code, but does not touch existing code.
 
 This is done by generating `*.partials.cs` files which contain:
 - `partial` definitions of `class`es and `struct`s containing extra functions and types.
