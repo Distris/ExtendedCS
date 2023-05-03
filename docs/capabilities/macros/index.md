@@ -14,9 +14,13 @@ C# introduced their own version of macros called [source generators](https://lea
 ## Macro Types
 
 We provide support for three types of macros:
-- [Attribute based macros](./attribute-based/index.md) - these are the simplest macros which you can use by just attaching an attribute to a type or a function. They typically do one thing only.
-- [Scriban based macros] - middle ground between ability and complexity.
-- C# based macros - the most complex and most powerful version of the macros.
+- [Attribute based macros](./attribute-based/index.md) - these are the simplest macros which you can use by just attaching an attribute to a type or a function. However, they are not very flexible.
+- [Scriban based macros](./scriban-based/index.md) - middle ground between ability and complexity.
+
+  You get the ability to program using [scriban](https://github.com/scriban/scriban) templating language and some ability to introspect the types you are working with, however you are still limited to what scriban / our compiler APIs offer you.
+- [C# based macros](./csharp-based/index.md) - the most complex and most powerful version of the macros.
+
+  You get access to raw Roslyn data structures and full power of C#, which allows you to do practically anything. For example, you can write macros to validate SQL at compile time, generate code based off some `.json` you read from the disk (or even fetch from the internet) and anything else that comes to your mind.
 
 :::note
 To understand how macros work, it is useful (though not necessary) to have an approximate understanding of [how the compiler performs the compilation](./csharp-compilation-process.md).

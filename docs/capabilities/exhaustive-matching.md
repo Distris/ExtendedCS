@@ -7,12 +7,12 @@ sidebar_position: 4
 In modern languages like [Scala](https://docs.scala-lang.org/scala3/reference/enums/adts.html), [Rust](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html), [Kotlin](https://kotlinlang.org/docs/sealed-classes.html) or [F#](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions), it is trivial to declare discriminated unions, also known as [algebraic data types (ADTs)](https://jrsinclair.com/articles/2019/algebraic-data-types-what-i-wish-someone-had-explained-about-functional-programming/).
 
 :::info
-If you are not familiar with ADTs, in a nutshell they are a way to express in your code that "this data can only take one of fixed number of forms".
+If you are not familiar with ADTs &mdash; they are a way to express in your code that "this data can only take one of fixed number of forms".
 
 For example, an item in a video game could be represented as one of:
-- Melee weapon with these properties: damage, time between attacks.
-- Ranged weapon with these properties: damage, maximum range, time between attacks.
-- Healing kit with these properties: hit points healed, time to heal, charges left.
+- **Melee weapon** with these properties: damage, time between attacks.
+- **Ranged weapon** with these properties: damage, maximum range, time between attacks.
+- **Healing kit** with these properties: hit points healed, time to heal, charges left.
 
 The idea is to have different code paths dealing with each case of the `Item` ADT. In our case, the melee weapon, ranged weapon or healing kit items require different code to handle them, as the items are very different.
 :::
