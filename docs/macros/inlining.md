@@ -4,7 +4,7 @@ sidebar_position: 0
 
 # Inlining
 
-This is a general overview of inlining, which is a process of taking a function call and putting the code from that directly at the call-site, instead of calling a function. After inlining the inlined function does not exist anymore in the code.
+This is a general overview of inlining, which is a process of taking a function call and putting the code from that function directly at the call-site, instead of calling a function. After inlining the inlined function does not exist anymore in the code.
 
 Lets take a look at an example. We define a new function that will get inlined:
 ```cs

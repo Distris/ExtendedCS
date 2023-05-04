@@ -159,7 +159,7 @@ int UseMyEnumADT(MyADT adt) {
 }
 ```
 
-Both `match` and `voidMatch` are [inlined](./macros/inlining.md), thus when you use them the code gets transformed to this:
+Both `match` and `voidMatch` are [inlined](../macros/inlining.md), thus when you use them the code gets transformed to this:
 ```cs
 int UseMyEnumADT(MyADT adt) {
   // Just run some code based on the case.

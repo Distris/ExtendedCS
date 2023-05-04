@@ -2,9 +2,9 @@
 sidebar_position: 0
 ---
 
-# Implicits
+# Implicit Parameter Resolution
 
-Implicits are a feature that we have ported from the [Scala language](https://scala-lang.org). They are a way to resolve function parameter values without providing them explicitly.
+Implicit parameter resolution is a feature that we have ported from the [Scala language](https://scala-lang.org). They are a way to resolve function parameter values without providing them explicitly.
 
 We currently have two ways to use implicits: `[Implicit]` and `[ImplicitPassThrough]`.
 
