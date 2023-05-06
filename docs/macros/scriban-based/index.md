@@ -1,4 +1,4 @@
-# TODO: Scriban-Based Macros
+# Scriban-Based Macros
 
 You can write your own logic using the [scriban template engine](https://github.com/scriban/scriban) with `[AttributeMacro]`.
 
@@ -26,13 +26,13 @@ Reference links to the most useful documentation:
 
 These parameters are always exposed to the scriban template:
 
-### `type`
+### type
 
 The current type of class/struct/enum or the containing type if your attribute is attached to a field or a property.
 
 **Parameter type:** [Type](#type-1)
 
-### `fieldName`
+### fieldName
 
 Refers to a field value of field `fieldName` on your custom attribute.
 
@@ -73,7 +73,7 @@ These parameters are only exposed if an attribute is added to a field:
 [MyScribanMacro] public int MyField;
 ```
 
-### `field`
+### field
 
 The field that this macro is attached to. In the example case this would be the `int MyField` field.
 
@@ -87,7 +87,7 @@ These parameters are only exposed if an attribute is added to a property:
 [MyScribanMacro] public int MyProperty { get; set; }
 ```
 
-### `property`
+### property
 
 The property that this macro is attached to. In the example case this would be the `int MyProperty` property.
 
@@ -104,7 +104,7 @@ These parameters are exposed if an attribute is added to a field or property:
 
 They make writing templates which work on both fields and properties easier to write.
 
-### `field_or_prop`
+### field_or_prop
 
 **Parameter type:** [`Field`](#field-1) or [`Property`](#property-1).
 
@@ -114,9 +114,11 @@ The respective data from either a [`field`](#field) or [`property`](#property) p
 
 In addition to built-in scriban types, the compiler defines additional types.
 
-### Type
+### EnumValue
 
-The `Type` type has these properties exposed to scriban:
+One of the defined cases in an `enum MyEnum { Case1, Case2 }` declaration.
+
+It has these properties exposed to scriban:
 <table>
   <thead>
     <tr>
@@ -128,28 +130,17 @@ The `Type` type has these properties exposed to scriban:
   <tr>
     <td>name</td>
     <td>string</td>
-    <td>The fully qualified type name, for example <code>global::System.Collections.Generic.List&lt;int&gt;</code>.</td>
+    <td>The fully qualified enum value name, for example <code>global::MyNamespace.MyEnum.Case1</code>.</td>
   </tr>
   <tr>
     <td>short_name</td>
     <td>string</td>
-    <td>The type name without the namespace and generic parameters, for example <code>List</code>.</td>
+    <td>The case name without the namespace and enum name, for example <code>Case1</code>.</td>
   </tr>
   <tr>
-    <td>visibility_modifier</td>
-    <td>string</td>
-    <td>One of <code>public</code>, <code>private</code>, <code>protected</code>, <code>internal</code> or <code>protected internal</code>.</td>
-  </tr>
-  <tr>
-    <td id="underlying_enum_type">underlying_enum_type</td>
-    <td><code><a href="#type-1">Type?</a></code></td>
-    <td>
-      If this <code>Type</code> is an <code>enum</code>, then this will have the underlying type of that <code>enum</code>.
-      <p/>
-      For example, <code>enum MyEnum : byte &#123; Case1, Case2 }</code> has an underlying type of <code>byte</code>.
-      <p/>
-      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/enums#192-enum-declarations"><code>enum</code>s that do not have an underlying type specified explicitly will use <code>int</code> as its underlying type</a>.
-    </td>
+    <td>value</td>
+    <td>object</td>
+    <td>Value assigned to this enum member, usually an <code>int</code>. Also see information about <a href="#underlying_enum_type">underlying enum types</a>.</td>
   </tr>
 </table>
 
@@ -246,6 +237,147 @@ The `Field` type has these properties exposed to scriban:
   </tr>
 </table>
 
+### FieldOrProp
+
+An internal structure for the compiler, obtainable from [`create_field_or_prop`](#create_field_or_prop) function, useable in [`generate_record_members`](#generate_record_members) function.
+
+### Method
+
+The `Method` type has these properties exposed to scriban:
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>name</td>
+    <td>string</td>
+    <td>The name of the the method in C#, for example <code>ComputeName</code> for <code>string ComputeName();</code></td>
+  </tr>
+  <tr>
+    <td>return_type</td>
+    <td><a href="#type-1">Type</a></td>
+    <td>The return type of the method in C#, for example <code>string</code> for <code>string ComputeName();</code></td>
+  </tr>
+  <tr>
+    <td>is_read_only</td>
+    <td>boolean</td>
+    <td>
+      Indicates whether the method is readonly, i.e. whether the 'this' receiver parameter is 'ref readonly'.
+      <p/>
+      Returns true for readonly instance methods and accessors and for reduced extension methods with a 'this in' parameter.
+    </td>
+  </tr>
+  <tr>
+    <td>parameters</td>
+    <td><a href="#parameter"><code>Parameter[]</code></a></td>
+    <td>Array of C# parameters provided to this method.</td>
+  </tr>
+  <tr>
+    <td>type_parameters</td>
+    <td><a href="#type-parameter"><code>TypeParameter[]</code></a></td>
+    <td>
+      Array of C# type parameters provided to this generic method. If the method is non-generic, this is empty.
+    </td>
+  </tr>
+  <tr>
+    <td>is_property</td>
+    <td>boolean</td>
+    <td>Whether this is a property. Always <code>false</code>.</td>
+  </tr>
+  <tr>
+    <td>is_field</td>
+    <td>boolean</td>
+    <td>Whether this is a field. Always <code>false</code>.</td>
+  </tr>
+  <tr>
+    <td>is_method</td>
+    <td>boolean</td>
+    <td>Whether this is a method. Always <code>true</code>.</td>
+  </tr>
+  <tr>
+    <td>is_static</td>
+    <td>boolean</td>
+    <td>Whether this is a static method, like <code>static int CalculateAge();</code></td>
+  </tr>
+  <tr>
+    <td>is_private</td>
+    <td>boolean</td>
+    <td>Whether this is a static method, like <code>private int CalculateAge();</code></td>
+  </tr>
+  <tr>
+    <td>is_protected</td>
+    <td>boolean</td>
+    <td>Whether this is a protected method, like <code>protected int CalculateAge();</code></td>
+  </tr>
+  <tr>
+    <td>is_internal</td>
+    <td>boolean</td>
+    <td>Whether this is an internal method, like <code>internal int CalculateAge();</code></td>
+  </tr>
+  <tr>
+    <td>is_public</td>
+    <td>boolean</td>
+    <td>Whether this is a public method, like <code>public int CalculateAge();</code></td>
+  </tr>
+  <tr>
+    <td>visibility_modifier</td>
+    <td>string</td>
+    <td>One of <code>public</code>, <code>private</code>, <code>protected</code>, <code>internal</code> or <code>protected internal</code>.</td>
+  </tr>
+  <tr>
+    <td>is_abstract</td>
+    <td>boolean</td>
+    <td>True if this is an abstract method, such as <code>abstract int CalculateAge();</code></td>
+  </tr>
+  <tr>
+    <td>is_virtual</td>
+    <td>boolean</td>
+    <td>True if this is an virtual method, such as <code>public virtual int CalculateAge();</code></td>
+  </tr>
+</table>
+
+### Parameter
+
+Parameter provided to an <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/indexers/">indexer property</a> (see [`parameters` on `Property`](#property-indexer-parameters)) or a regular [`Method`](#method).
+
+```cs title="Example of an indexer property"
+class SampleCollection<T> {
+  // Declare an array to store the data elements.
+  private T[] arr = new T[100];
+
+  // Define the indexer to allow client code to use [] notation.
+  public T this[int idx] {
+    get { return arr[idx]; }
+    set { arr[idx] = value; }
+  }
+}
+```
+
+It has these properties exposed to scriban:
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>name</td>
+    <td>string</td>
+    <td>The name of the parameter, for example <code>idx</code>.</td>
+  </tr>
+  <tr>
+    <td>type</td>
+    <td><a href="#type-1">Type</a></td>
+    <td>The type of the parameter, for example <code>int</code>.</td>
+  </tr>
+</table>
+
 ### Property
 
 The `Property` type has these properties exposed to scriban:
@@ -288,8 +420,8 @@ The `Property` type has these properties exposed to scriban:
     <td>Whether the property has the <code>set;</code> part, for example <code>string MyProp &#123; set; }</code> or <code>string MyProp &#123; get; set; }</code></td>
   </tr>
   <tr>
-    <td>parameters</td>
-    <td><a href="#prop-param"><code>PropParam[]</code></a></td>
+    <td id="property-indexer-parameters">parameters</td>
+    <td><a href="#parameter"><code>Parameter[]</code></a></td>
     <td>
       If this property is an <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/indexers/">indexer</a> (such as <code>int this[string key1, string key2] => ...;</code>), this returns an array of the parameters provided to the indexer.
     </td>
@@ -351,36 +483,9 @@ The `Property` type has these properties exposed to scriban:
   </tr>
 </table>
 
-### Method
+### Type
 
-  ///   <li><b>return_type</b>: Type</li>
-  ///   <li><b>is_read_only</b>: bool</li>
-  ///   <li><b>parameters</b>: { name: string, type: Type }</li>
-  ///   <li><b>type_parameters</b>: {
-  ///     name: string,
-  ///     additional_constraint: string? ("struct" | "class" | "unmanaged" | null),
-  ///     has_constructor_constraint: bool,
-  ///     constraint_types: Type[],
-  ///   }</li>
-  /// 
-  ///   <li><b>is_property</b>: bool - false</li>
-  ///   <li><b>is_field</b>: bool - false</li>
-  ///   <li><b>is_method</b>: bool - true</li>
-  ///   <li><b>is_static</b>: bool</li>
-  ///   <li><b>is_abstract</b>: bool</li>
-  ///   <li><b>is_virtual</b>: bool</li>
-  ///   <li><b>is_private</b>: bool</li>
-  ///   <li><b>is_public</b>: bool</li>
-  ///   <li><b>is_internal</b>: bool</li>
-  ///   <li><b>is_protected</b>: bool</li>
-  ///   <li><b>visibility_modifier</b>: string = "public", "private", "protected", "internal", "protected internal",
-  /// "not_applicable"</li>
-
-### EnumValue
-
-One of the defined cases in an `enum MyEnum { Case1, Case2 }` declaration.
-
-It has these properties exposed to scriban:
+The `Type` type has these properties exposed to scriban:
 <table>
   <thead>
     <tr>
@@ -390,36 +495,44 @@ It has these properties exposed to scriban:
     </tr>
   </thead>
   <tr>
-    <td>name</td>
+    <td id="type-name">name</td>
     <td>string</td>
-    <td>The fully qualified enum value name, for example <code>global::MyNamespace.MyEnum.Case1</code>.</td>
+    <td>The fully qualified type name, for example <code>global::System.Collections.Generic.List&lt;int&gt;</code>.</td>
   </tr>
   <tr>
     <td>short_name</td>
     <td>string</td>
-    <td>The case name without the namespace and enum name, for example <code>Case1</code>.</td>
+    <td>The type name without the namespace and generic parameters, for example <code>List</code>.</td>
   </tr>
   <tr>
-    <td>value</td>
-    <td>object</td>
-    <td>Value assigned to this enum member, usually an <code>int</code>. Also see information about <a href="#underlying_enum_type">underlying enum types</a>.</td>
+    <td>visibility_modifier</td>
+    <td>string</td>
+    <td>One of <code>public</code>, <code>private</code>, <code>protected</code>, <code>internal</code> or <code>protected internal</code>.</td>
+  </tr>
+  <tr>
+    <td id="underlying_enum_type">underlying_enum_type</td>
+    <td><code><a href="#type-1">Type?</a></code></td>
+    <td>
+      If this <code>Type</code> is an <code>enum</code>, then this will have the underlying type of that <code>enum</code>.
+      <p/>
+      For example, <code>enum MyEnum : byte &#123; Case1, Case2 }</code> has an underlying type of <code>byte</code>.
+      <p/>
+      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/enums#192-enum-declarations"><code>enum</code>s that do not have an underlying type specified explicitly will use <code>int</code> as its underlying type</a>.
+    </td>
   </tr>
 </table>
 
-### PropParam
+### TypeParameter
 
-Parameter provided to an <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/indexers/">indexer property</a>.
+A type parameter provided to a generic [`Method`](#method).
 
-```cs
-class SampleCollection<T> {
-  // Declare an array to store the data elements.
-  private T[] arr = new T[100];
-
-  // Define the indexer to allow client code to use [] notation.
-  public T this[int idx] {
-    get { return arr[idx]; }
-    set { arr[idx] = value; }
-  }
+```cs title="Example of a generic method"
+TDispatcher DoDispatch<TDispatcher, TEvent>(
+  TDispatcher dispatcher, Action<TEvent> onEvent
+)
+  where TDispatcher : IDispatcher
+{
+  // ...
 }
 ```
 
@@ -435,11 +548,383 @@ It has these properties exposed to scriban:
   <tr>
     <td>name</td>
     <td>string</td>
-    <td>The name of the parameter, for example <code>idx</code>.</td>
+    <td>The name of the generic parameter, for example <code>TDispatcher</code> or <code>TEvent</code>.</td>
   </tr>
   <tr>
-    <td>type</td>
-    <td><a href="#type-1">Type</a></td>
-    <td>The type of the parameter, for example <code>int</code>.</td>
+    <td>additional_constraint</td>
+    <td>string?</td>
+    <td>
+      Indicates whether the generic parameter has any of these constraints:
+      <ul>
+        <li><code>struct</code> &mdash; for example in <code>where TEvent : struct</code></li>
+        <li><code>class</code> &mdash; for example in <code>where TEvent : class</code></li>
+        <li><code>unmanaged</code> &mdash; for example in <code>where TEvent : unmanaged</code></li>
+        <li><code>null</code> otherwise</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>has_constructor_constraint</td>
+    <td>boolean</td>
+    <td>
+      <code>true</code> if the generic parameter has the <code>where TEvent : new()</code> constaint.
+    </td>
+  </tr>
+  <tr>
+    <td>constraint_types</td>
+    <td><a href="#type-1">Type[]</a></td>
+    <td>
+      Array of types that constrain this generic parameter, for example <code>where TEvent : IReadable, IWritable</code>.
+    </td>
   </tr>
 </table>
+
+
+## Functions
+
+In addition to the [built-in functions](https://github.com/scriban/scriban/blob/master/doc/builtins.md) we additionally add these functions to scriban templates.
+
+### throw
+
+**Function Signature**: `void throw(string message)`
+
+Fails the code generation and passes the error message to the compiler output.
+
+```text title="Example"
+{{
+  if YourParameter > 6
+    throw 'YourParameter can not be more than 6, you provided ' + YourParameter + '!'
+  end
+}}
+```
+
+### add_extensions
+
+**Function Signature**: `void add_extensions(string extensionsCode)`
+
+Pass a string that contains extension methods, they will be parsed and added to a separate static class.
+
+You can use [`capture` feature of scriban engine to do that conveniently](https://github.com/scriban/scriban/blob/master/doc/language.md#96-capture-variable--end).
+
+```text title="Example"
+{{ capture extensions }}
+  {{ exts_type_name = type.name }}
+
+  /// <summary>Converts a value to a single flag.</summary>
+  public static {{exts_type_name}}Flags toFlags(this {{exts_type_name}} v) =>
+    ({{exts_type_name}}Flags) (1{{shiftSuffix}} << (int) v);
+{{ end }}
+
+{{ add_extensions extensions }}
+```
+
+### add_interface
+
+**Function Signature**: `void add_interface(string interfaceName)`
+
+Adds an interface to a generated partial class.
+
+```text title="Example"
+{{
+  add_interface 'IEquatable<' + (typeFor | type_reduced_name) + '>'
+}}
+```
+
+### add_using
+
+**Function Signature**: `void add_using(string usingName)`
+
+Adds `using X;` C# directive to the generated file.
+
+```text title="Example"
+{{
+  add_using 'FPCSharpUnity.core.json'
+}}
+```
+
+### rename_as_public_accessor
+
+**Function Signature**: `string rename_as_public_accessor(string identifier)`
+
+Renames the string according to [`[PublicAccessor]`](../../capabilities/public-accessor.md) naming rules.
+
+```text title="Example"
+{{
+  public_name = rename_as_public_accessor '_MyField'
+  # public_name = 'MyField'
+}}
+```
+
+### fdqn_last
+
+**Function Signature**: `string fdqn_last(string identifier)`
+
+Returns the string without the namespace and generic parameters.
+
+```text title="Example"
+{{
+  name = fdqn_last 'System.Collections.Generic.List<int>'
+  # name = 'List'
+}}
+```
+
+### type_arguments
+
+**Function Signature**: <code>[Type[]](#type-1) type_arguments([Type](#type-1) type)</code>
+
+Returns an array of generic arguments if they exist on this type.
+
+```text title="Example"
+{{
+  # type = typeof(System.Collection.Generic.List<int>)
+
+  type_args = type_arguments type
+  # type_args = [typeof(int)]
+}}
+```
+
+### type_enum_values
+
+**Function Signature**: <code>[EnumValue[]](#enumvalue) type_enum_values([Type](#type-1) type)</code>
+
+Returns an array of `enum` values. Only available if `type` is an `enum` type.
+
+```text title="Example"
+{{
+  # Given the definition:
+  #   enum MyEnum { Case1, Case2 }
+  #
+  # type = typeof(MyEnum)
+
+  enum_values = type_enum_values type
+  # enum_values = [EnumValue(MyEnum.Case1), EnumValue(MyEnum.Case2)]
+}}
+```
+
+### type_enum_value
+
+**Function Signature**: <code>object type_enum_value([Type](#type-1) type, string name)</code>
+
+Gets the underlying constant value for the `enum` case with the `name`.
+
+```text title="Example"
+{{
+  # Given the definition:
+  #   enum MyEnum { Case1 = 5, Case2 = 10 }
+  #
+  # type = typeof(MyEnum)
+
+  enum_value = type_enum_value type 'Case1'
+  # enum_value = 5
+}}
+```
+
+### type_reduced_name
+
+**Function Signature**: <code>string type_reduced_name([Type](#type-1) type)</code>
+
+Returns a shortened string representation of a [Type](#type-1) name that is usable in the generated code without clashing with other types.
+
+This is very useful to make generated code more readable by replacing types like `global::MyNamespace.MyClass.MyInnerClass` with just `MyClass.MyInnerclass`.
+
+However, the substitution may not always be possible in the current context, then this just returns [`Type.name`](#type-name).
+
+### type_get_all_fields
+
+**Function Signature**: <code>[Field[]](#field-1) type_get_all_fields(
+&nbsp;&nbsp;[Type](#type-1) type, 
+&nbsp;&nbsp;boolean public = true, 
+&nbsp;&nbsp;boolean private = true, 
+&nbsp;&nbsp;boolean protected = true, 
+&nbsp;&nbsp;boolean instance = true, 
+&nbsp;&nbsp;boolean static = false, 
+&nbsp;&nbsp;boolean const = false
+)</code>
+
+Gets all fields of a Type. You can filter the list based on parameters.
+
+Use the [named arguments syntax](https://github.com/scriban/scriban/blob/master/doc/language.md#named-arguments) to set up the filters.
+
+```text title="Example"
+{{
+  fields = type_get_all_fields my_type static:true
+}}
+```
+
+### type_get_field
+
+**Function Signature**: <code>[Field](#field-1) type_get_field([Type](#type-1) type, string fieldName)</code>
+
+Gets a field of a Type with a specified name.
+
+```text title="Example"
+{{
+  field = type_get_field my_type 'MyField'
+}}
+```
+
+### type_get_all_methods
+
+**Function Signature**: <code>[Method[]](#method) type_get_all_methods(
+&nbsp;&nbsp;[Type](#type-1) type, 
+&nbsp;&nbsp;boolean public = true, 
+&nbsp;&nbsp;boolean private = true, 
+&nbsp;&nbsp;boolean protected = true, 
+&nbsp;&nbsp;boolean instance = true, 
+&nbsp;&nbsp;boolean static = false, 
+&nbsp;&nbsp;// Whether to include methods from base types.
+&nbsp;&nbsp;boolean include_base_types = false,
+&nbsp;&nbsp;// Whether to include methods from the implemented interfaces.
+&nbsp;&nbsp;boolean include_interfaces = false
+)</code>
+
+Gets all methods of a Type. You can filter the list based on parameters.
+
+```text title="Example"
+{{
+  methods = type_get_all_methods my_type static:true
+}}
+```
+
+### type_get_all_properties
+
+**Function Signature**: <code>[Property[]](#property-1) type_get_all_properties(
+&nbsp;&nbsp;[Type](#type-1) type, 
+&nbsp;&nbsp;boolean public = true, 
+&nbsp;&nbsp;boolean private = true, 
+&nbsp;&nbsp;boolean protected = true, 
+&nbsp;&nbsp;boolean instance = true, 
+&nbsp;&nbsp;boolean static = false, 
+&nbsp;&nbsp;// Whether to include methods from base types.
+&nbsp;&nbsp;boolean include_base_types = false,
+&nbsp;&nbsp;// Whether to include methods from the implemented interfaces.
+&nbsp;&nbsp;boolean include_interfaces = false
+)</code>
+
+Gets all properties of a Type. You can filter the list based on parameters.
+
+```text title="Example"
+{{
+  properties = type_get_all_properties my_type static:true
+}}
+```
+
+### type_get_property
+
+**Function Signature**: <code>[Property](#property) type_get_property([Type](#type-1) type, string propertyName)</code>
+
+Gets a property of a Type with a specified name.
+
+```text title="Example"
+{{
+  field = type_get_property my_type 'MyProperty'
+}}
+```
+
+### type_get_full_metadata_name
+
+**Function Signature**: <code>string type_get_full_metadata_name([Type](#type-1) type)</code>
+
+Gets the full C# metadata name that can be used in the [`find_type`](#find_type) function.
+
+Implementation is taken from [this StackOverflow answer](https://stackoverflow.com/a/27106959).
+
+```text title="Example"
+{{
+  type_metadata_name = type_get_full_metadata_name my_type
+}}
+```
+
+### type_get_descendants_in_assembly
+
+**Function Signature**: <code>[Type[]](#type-1) type_get_descendants_in_assembly([Type](#type-1) type, [Type](#type-1) type_for_assembly = null, boolean collect_indirect_descendants = false)</code>
+
+Gets all descendant types (types that extend the specified type) that are contained in a single assembly.
+
+The assembly to check is taken from the `type_for_assembly` parameter. If `type_for_assembly` is not provided, then we take the assembly in which `type` is defined.
+
+- **`collect_indirect_descendants`** - if `false`, this function will only collect direct (Level 1) descendants.
+
+:::note
+This function is not optimized so do not call it often.
+:::
+
+### generate_record_members
+
+**Function Signature**: <code>void generate_record_members(
+&nbsp;&nbsp;([Field](#field-1)|[Property](#property-1)|[FieldOrProp](#fieldorprop))[] fields_and_props,
+&nbsp;&nbsp;boolean generate_comparer = true,
+&nbsp;&nbsp;boolean generate_to_string = true,
+&nbsp;&nbsp;boolean generate_get_hash_code = true,
+&nbsp;&nbsp;boolean constructor_flags = GenerationAttributes.ConstructorFlags.Default,
+)</code>
+
+Generates [record](../../capabilities/record/index.md) members (constructors and other functions) on the current type for `fields_and_props` that were given.
+
+### create_field_or_prop
+
+**Function Signature**: <code>[FieldOrProp](#fieldorprop) create_field_or_prop([Type](#type-1) type, string name)</code>
+
+Creates a [FieldOrProp](#fieldorprop) data structure from a field or property with the name `name` on a `type`. This data structure can only be passed to `generate_record_members`(#generate_record_members) function.
+
+### type_get_record_members
+
+**Function Signature**: <code>{
+&nbsp;&nbsp;"all": ([Field](#field-1)|[Property](#property-1))[],
+&nbsp;&nbsp;"fields": [Field](#field-1)[],
+&nbsp;&nbsp;"properties": [Property](#property-1)[],
+} type_get_record_members([Type](#type-1) type)</code>
+
+Returns an object with 3 properties (`all`, `fields`, `properties`) containing members of a `type` retrieved using the same logic as a [`[Record]`](../../capabilities/record/index.md) would.
+
+```text title="Example"
+{{
+  for member in (type_get_record_members of_type).all
+    ...
+  end
+}}
+```
+
+### find_type
+
+**Function Signature**: <code>[Type?](#type-1) find_type(string fdqn, [Type?](#type-1) type_for_assembly = null)</code>
+
+Tries to find a type in either a single assembly or whole compilation.
+
+If `type_for_assembly` is provided, the search is only conducted in that assembly, otherwise all available assemblies are searched.
+
+You can use the [`type_get_full_metadata_name`](#type_get_full_metadata_name) function to get the `fdqn` that is suitable for this function.
+
+Returns `null` if not found.
+
+```text title="Example"
+{{
+  maybeAssetRefFromType = 'Quantum.' + assetRefFromName | find_type
+}}
+```
+
+### is_var_defined
+
+**Function Signature**: <code>boolean is_var_defined(string variable)</code>
+
+Returns whether a variable is defined in scriban template root scope.
+
+This is very useful in dealing with default parameters in the attributes.
+
+```cs title="Example"
+[AttributeMacro(@"
+{{
+  if !is_var_defined 'isSomeName'
+    isSomeName = '__unsafeIsSome'
+  end
+
+  # ...
+}}
+")]
+public class NullableTAttribute : Attribute {
+  /// <summary>Name for the 'bool isSome' field. `__unsafeIsSome` by default.</summary>
+  public string isSomeName;
+
+  // ...
+}
+```
