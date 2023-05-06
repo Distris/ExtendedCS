@@ -5,6 +5,7 @@ You can write your own logic using the [scriban template engine](https://github.
 Add this `[AttributeMacro]` attribute on your own custom attribute:
 ```cs
 using System;
+using GenerationAttributes;
 
 [AttributeMacro(@"
   scriban code goes here
@@ -21,6 +22,109 @@ Scriban is a templating language, similar to PHP.
 Reference links to the most useful documentation:
 - [Language description](https://github.com/scriban/scriban/blob/master/doc/language.md) &mdash; describes how blocks, control statements, comments, templating works.
 - [Built-in functions](https://github.com/scriban/scriban/blob/master/doc/builtins.md) &mdash; a comprehensive list of built-in functions available for you.
+
+## Examples
+
+```cs title="Example of a field macro"
+using System;
+using GenerationAttributes;
+
+[
+  AttributeMacro(@"
+/// <summary>
+/// <para>Sets the <see cref=""{{ field.name }}""/> value.</para>
+/// </summary>
+public {{ 
+if field.is_static 
+  'static' 
+end 
+}} void EDITOR_set{{ field.name | rename | pascal_case }}(
+  {{ field.type | type_reduced_name }} value
+) => {{ field.name }} = value;
+  "), 
+  AttributeUsage(AttributeTargets.Field)
+]
+public class EditorSetterAttribute : Attribute {}
+
+class MyCharacterData {
+  [SerializeField, EditorSetter] CharacterRole _type;
+}
+```
+
+```cs title="Example of a class macro"
+using System;
+using GenerationAttributes;
+
+[
+  AttributeMacro(@"
+public static TimeSpan {{ ourMethodBaseName }}(this short v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this ushort v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this int v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this uint v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this long v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this ulong v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this float v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}(this double v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+
+public static TimeSpan {{ ourMethodBaseName }}s(this short v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this ushort v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this int v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this uint v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this long v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this ulong v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this float v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+public static TimeSpan {{ ourMethodBaseName }}s(this double v) => 
+  TimeSpan.{{ timeSpanMethodName }}(v);
+  "),
+  AttributeUsage(AttributeTargets.Class, AllowMultiple = true)
+]
+class GenTimeSpanHelpersAttribute : Attribute {
+  /// <summary>Name of our extension, like 'milli'.</summary>
+  public string ourMethodBaseName;
+    
+  /// <summary>Name on <see cref="TimeSpan"/>, like 'FromMilliseconds'.</summary>
+  public string timeSpanMethodName;
+}
+
+[
+  GenTimeSpanHelpers(
+    ourMethodBaseName = "milli", 
+    timeSpanMethodName = nameof(TimeSpan.FromMilliseconds)
+  ),
+  GenTimeSpanHelpers(
+    ourMethodBaseName = "second", 
+    timeSpanMethodName = nameof(TimeSpan.FromSeconds)
+  ),
+  GenTimeSpanHelpers(
+    ourMethodBaseName = "minute", 
+    timeSpanMethodName = nameof(TimeSpan.FromMinutes)
+  ),
+  GenTimeSpanHelpers(
+    ourMethodBaseName = "hour", 
+    timeSpanMethodName = nameof(TimeSpan.FromHours)
+  ),
+  GenTimeSpanHelpers(
+    ourMethodBaseName = "day", 
+    timeSpanMethodName = nameof(TimeSpan.FromDays)
+  ),
+] 
+public static partial class TimeSpanExts {}
+```
 
 ## Parameters
 
@@ -584,19 +688,20 @@ It has these properties exposed to scriban:
 
 In addition to the [built-in functions](https://github.com/scriban/scriban/blob/master/doc/builtins.md) we additionally add these functions to scriban templates.
 
-### throw
+### Case Changing Functions
 
-**Function Signature**: `void throw(string message)`
+These functions from [Soltys.ChangeCase](https://github.com/soltys/Soltys.ChangeCase) library are exposed to the scriban template.
 
-Fails the code generation and passes the error message to the compiler output.
-
-```text title="Example"
-{{
-  if YourParameter > 6
-    throw 'YourParameter can not be more than 6, you provided ' + YourParameter + '!'
-  end
-}}
-```
+- [`string sentence_case(string input, string replacement = " ")`](https://github.com/soltys/Soltys.ChangeCase#sentencecase)
+- [`string camel_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#camelcase)
+- [`string pascal_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#pascalcase)
+- [`string upper_case_first(string input)`](https://github.com/soltys/Soltys.ChangeCase#uppercasefirst)
+- [`string param_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#paramcase)
+- [`string dot_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#dotcase)
+- [`string swap_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#swapcase)
+- [`string title_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#titlecase)
+- [`string snake_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#snakecase)
+- [`string constant_case(string input)`](https://github.com/soltys/Soltys.ChangeCase#constantcase)
 
 ### add_extensions
 
@@ -642,6 +747,82 @@ Adds `using X;` C# directive to the generated file.
 }}
 ```
 
+### create_field_or_prop
+
+**Function Signature**: <code>[FieldOrProp](#fieldorprop) create_field_or_prop([Type](#type-1) type, string name)</code>
+
+Creates a [FieldOrProp](#fieldorprop) data structure from a field or property with the name `name` on a `type`. This data structure can only be passed to `generate_record_members`(#generate_record_members) function.
+
+### fdqn_last
+
+**Function Signature**: `string fdqn_last(string identifier)`
+
+Returns the string without the namespace and generic parameters.
+
+```text title="Example"
+{{
+  name = fdqn_last 'System.Collections.Generic.List<int>'
+  # name = 'List'
+}}
+```
+
+### find_type
+
+**Function Signature**: <code>[Type?](#type-1) find_type(string fdqn, [Type?](#type-1) type_for_assembly = null)</code>
+
+Tries to find a type in either a single assembly or whole compilation.
+
+If `type_for_assembly` is provided, the search is only conducted in that assembly, otherwise all available assemblies are searched.
+
+You can use the [`type_get_full_metadata_name`](#type_get_full_metadata_name) function to get the `fdqn` that is suitable for this function.
+
+Returns `null` if not found.
+
+```text title="Example"
+{{
+  maybeAssetRefFromType = 'Quantum.' + assetRefFromName | find_type
+}}
+```
+
+### generate_record_members
+
+**Function Signature**: <code>void generate_record_members(
+&nbsp;&nbsp;([Field](#field-1)|[Property](#property-1)|[FieldOrProp](#fieldorprop))[] fields_and_props,
+&nbsp;&nbsp;boolean generate_comparer = true,
+&nbsp;&nbsp;boolean generate_to_string = true,
+&nbsp;&nbsp;boolean generate_get_hash_code = true,
+&nbsp;&nbsp;boolean constructor_flags = GenerationAttributes.ConstructorFlags.Default,
+)</code>
+
+Generates [record](../../capabilities/record/index.md) members (constructors and other functions) on the current type for `fields_and_props` that were given.
+
+### is_var_defined
+
+**Function Signature**: <code>boolean is_var_defined(string variable)</code>
+
+Returns whether a variable is defined in scriban template root scope.
+
+This is very useful in dealing with default parameters in the attributes.
+
+```cs title="Example"
+[AttributeMacro(@"
+{{
+  if !is_var_defined 'isSomeName'
+    isSomeName = '__unsafeIsSome'
+  end
+
+  # ...
+}}
+")]
+public class NullableTAttribute : Attribute {
+  /// <summary>Name for the 'bool isSome' field. `__unsafeIsSome` by default.</summary>
+  public string isSomeName;
+
+  // ...
+}
+```
+
+
 ### rename_as_public_accessor
 
 **Function Signature**: `string rename_as_public_accessor(string identifier)`
@@ -655,16 +836,17 @@ Renames the string according to [`[PublicAccessor]`](../../capabilities/public-a
 }}
 ```
 
-### fdqn_last
+### throw
 
-**Function Signature**: `string fdqn_last(string identifier)`
+**Function Signature**: `void throw(string message)`
 
-Returns the string without the namespace and generic parameters.
+Fails the code generation and passes the error message to the compiler output.
 
 ```text title="Example"
 {{
-  name = fdqn_last 'System.Collections.Generic.List<int>'
-  # name = 'List'
+  if YourParameter > 6
+    throw 'YourParameter can not be more than 6, you provided ' + YourParameter + '!'
+  end
 }}
 ```
 
@@ -680,24 +862,6 @@ Returns an array of generic arguments if they exist on this type.
 
   type_args = type_arguments type
   # type_args = [typeof(int)]
-}}
-```
-
-### type_enum_values
-
-**Function Signature**: <code>[EnumValue[]](#enumvalue) type_enum_values([Type](#type-1) type)</code>
-
-Returns an array of `enum` values. Only available if `type` is an `enum` type.
-
-```text title="Example"
-{{
-  # Given the definition:
-  #   enum MyEnum { Case1, Case2 }
-  #
-  # type = typeof(MyEnum)
-
-  enum_values = type_enum_values type
-  # enum_values = [EnumValue(MyEnum.Case1), EnumValue(MyEnum.Case2)]
 }}
 ```
 
@@ -719,15 +883,23 @@ Gets the underlying constant value for the `enum` case with the `name`.
 }}
 ```
 
-### type_reduced_name
+### type_enum_values
 
-**Function Signature**: <code>string type_reduced_name([Type](#type-1) type)</code>
+**Function Signature**: <code>[EnumValue[]](#enumvalue) type_enum_values([Type](#type-1) type)</code>
 
-Returns a shortened string representation of a [Type](#type-1) name that is usable in the generated code without clashing with other types.
+Returns an array of `enum` values. Only available if `type` is an `enum` type.
 
-This is very useful to make generated code more readable by replacing types like `global::MyNamespace.MyClass.MyInnerClass` with just `MyClass.MyInnerclass`.
+```text title="Example"
+{{
+  # Given the definition:
+  #   enum MyEnum { Case1, Case2 }
+  #
+  # type = typeof(MyEnum)
 
-However, the substitution may not always be possible in the current context, then this just returns [`Type.name`](#type-name).
+  enum_values = type_enum_values type
+  # enum_values = [EnumValue(MyEnum.Case1), EnumValue(MyEnum.Case2)]
+}}
+```
 
 ### type_get_all_fields
 
@@ -748,18 +920,6 @@ Use the [named arguments syntax](https://github.com/scriban/scriban/blob/master/
 ```text title="Example"
 {{
   fields = type_get_all_fields my_type static:true
-}}
-```
-
-### type_get_field
-
-**Function Signature**: <code>[Field](#field-1) type_get_field([Type](#type-1) type, string fieldName)</code>
-
-Gets a field of a Type with a specified name.
-
-```text title="Example"
-{{
-  field = type_get_field my_type 'MyField'
 }}
 ```
 
@@ -809,15 +969,29 @@ Gets all properties of a Type. You can filter the list based on parameters.
 }}
 ```
 
-### type_get_property
+### type_get_descendants_in_assembly
 
-**Function Signature**: <code>[Property](#property) type_get_property([Type](#type-1) type, string propertyName)</code>
+**Function Signature**: <code>[Type[]](#type-1) type_get_descendants_in_assembly([Type](#type-1) type, [Type](#type-1) type_for_assembly = null, boolean collect_indirect_descendants = false)</code>
 
-Gets a property of a Type with a specified name.
+Gets all descendant types (types that extend the specified type) that are contained in a single assembly.
+
+The assembly to check is taken from the `type_for_assembly` parameter. If `type_for_assembly` is not provided, then we take the assembly in which `type` is defined.
+
+- **`collect_indirect_descendants`** - if `false`, this function will only collect direct (Level 1) descendants.
+
+:::note
+This function is not optimized so do not call it often.
+:::
+
+### type_get_field
+
+**Function Signature**: <code>[Field](#field-1) type_get_field([Type](#type-1) type, string fieldName)</code>
+
+Gets a field of a Type with a specified name.
 
 ```text title="Example"
 {{
-  field = type_get_property my_type 'MyProperty'
+  field = type_get_field my_type 'MyField'
 }}
 ```
 
@@ -835,37 +1009,17 @@ Implementation is taken from [this StackOverflow answer](https://stackoverflow.c
 }}
 ```
 
-### type_get_descendants_in_assembly
+### type_get_property
 
-**Function Signature**: <code>[Type[]](#type-1) type_get_descendants_in_assembly([Type](#type-1) type, [Type](#type-1) type_for_assembly = null, boolean collect_indirect_descendants = false)</code>
+**Function Signature**: <code>[Property](#property) type_get_property([Type](#type-1) type, string propertyName)</code>
 
-Gets all descendant types (types that extend the specified type) that are contained in a single assembly.
+Gets a property of a Type with a specified name.
 
-The assembly to check is taken from the `type_for_assembly` parameter. If `type_for_assembly` is not provided, then we take the assembly in which `type` is defined.
-
-- **`collect_indirect_descendants`** - if `false`, this function will only collect direct (Level 1) descendants.
-
-:::note
-This function is not optimized so do not call it often.
-:::
-
-### generate_record_members
-
-**Function Signature**: <code>void generate_record_members(
-&nbsp;&nbsp;([Field](#field-1)|[Property](#property-1)|[FieldOrProp](#fieldorprop))[] fields_and_props,
-&nbsp;&nbsp;boolean generate_comparer = true,
-&nbsp;&nbsp;boolean generate_to_string = true,
-&nbsp;&nbsp;boolean generate_get_hash_code = true,
-&nbsp;&nbsp;boolean constructor_flags = GenerationAttributes.ConstructorFlags.Default,
-)</code>
-
-Generates [record](../../capabilities/record/index.md) members (constructors and other functions) on the current type for `fields_and_props` that were given.
-
-### create_field_or_prop
-
-**Function Signature**: <code>[FieldOrProp](#fieldorprop) create_field_or_prop([Type](#type-1) type, string name)</code>
-
-Creates a [FieldOrProp](#fieldorprop) data structure from a field or property with the name `name` on a `type`. This data structure can only be passed to `generate_record_members`(#generate_record_members) function.
+```text title="Example"
+{{
+  field = type_get_property my_type 'MyProperty'
+}}
+```
 
 ### type_get_record_members
 
@@ -885,46 +1039,12 @@ Returns an object with 3 properties (`all`, `fields`, `properties`) containing m
 }}
 ```
 
-### find_type
+### type_reduced_name
 
-**Function Signature**: <code>[Type?](#type-1) find_type(string fdqn, [Type?](#type-1) type_for_assembly = null)</code>
+**Function Signature**: <code>string type_reduced_name([Type](#type-1) type)</code>
 
-Tries to find a type in either a single assembly or whole compilation.
+Returns a shortened string representation of a [Type](#type-1) name that is usable in the generated code without clashing with other types.
 
-If `type_for_assembly` is provided, the search is only conducted in that assembly, otherwise all available assemblies are searched.
+This is very useful to make generated code more readable by replacing types like `global::MyNamespace.MyClass.MyInnerClass` with just `MyClass.MyInnerclass`.
 
-You can use the [`type_get_full_metadata_name`](#type_get_full_metadata_name) function to get the `fdqn` that is suitable for this function.
-
-Returns `null` if not found.
-
-```text title="Example"
-{{
-  maybeAssetRefFromType = 'Quantum.' + assetRefFromName | find_type
-}}
-```
-
-### is_var_defined
-
-**Function Signature**: <code>boolean is_var_defined(string variable)</code>
-
-Returns whether a variable is defined in scriban template root scope.
-
-This is very useful in dealing with default parameters in the attributes.
-
-```cs title="Example"
-[AttributeMacro(@"
-{{
-  if !is_var_defined 'isSomeName'
-    isSomeName = '__unsafeIsSome'
-  end
-
-  # ...
-}}
-")]
-public class NullableTAttribute : Attribute {
-  /// <summary>Name for the 'bool isSome' field. `__unsafeIsSome` by default.</summary>
-  public string isSomeName;
-
-  // ...
-}
-```
+However, the substitution may not always be possible in the current context, then this just returns [`Type.name`](#type-name).
