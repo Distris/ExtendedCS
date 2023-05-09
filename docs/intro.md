@@ -22,7 +22,7 @@ In today's fast-paced technology landscape, efficiency and productivity are cruc
 
 Embrace ExtendedCS today and propel your C# development to new heights. Give your team the tools they need to excel, and experience the tangible benefits of increased productivity and code quality.
 
-## The Birth of ExtendedCS
+## The Origins of ExtendedCS
 
 _Our Journey and the Heart Behind ExtendedCS_
 
@@ -34,13 +34,13 @@ Then, one day, we discovered a community effort to integrate the new Roslyn comp
 
 However, we still faced some challenges. Our adoption of functional programming tools meant that we created numerous one-off types, each tailored to a specific aspect of our domain. Writing and updating these types was not only time-consuming but also quite boring. We tried using tools like ReSharper and Rider to generate the code, but we still had to manually update the generated code whenever we added a new field to a type. This process was error-prone, as it was easy to forget to regenerate all of the code or make a subtle mistake in the update.
 
-That's when we had an idea: since we were already replacing the default compiler and Roslyn was open-source, why not create our own extensions and incorporate them into Roslyn? Inspired by this thought, we rolled up our sleeves and started hacking away at the compiler, eventually giving birth to the first versions of ExtendedCS.
+That's when we had an idea: since we were already replacing the default compiler and Roslyn was open-source, why not create our own extensions and incorporate them into Roslyn? Inspired by this thought, we rolled up our sleeves and started hacking away at the compiler, resulting in the creation of the first versions of ExtendedCS.
 
 Over time, we developed patterns to eliminate boilerplate code, such as `[LazyProperty]` for caching expensive computations and `[PublicAccessor]` to prevent exposing mutable Unity-serialized fields while reducing the need to write public getters for private fields.
 
 We designed our game logic using discriminated unions (also known as algebraic data types), which are a powerful way to represent different variations of data within a single type. However, we faced challenges with C#'s switch statement, specifically its non-exhaustiveness. This limitation meant that the compiler did not enforce the handling of all possible cases of a given type, potentially leading to unhandled cases or errors when new cases were introduced later. The non-exhaustive nature of the switch statement resulted in less reliable code, as it was easy to overlook a case during development or maintenance. Thus to address this issue, we developed the [Matcher] pattern.
 
-In our codebase, we utilized the `Either` type to avoid [problems with using exceptions for control flow](https://wiki.c2.com/?DontUseExceptionsForFlowControl) (similar to [Rust's `Result`](https://doc.rust-lang.org/std/result/)) and wondered if we could incorporate something like the [`?` operator](https://doc.rust-lang.org/std/result/#the-question-mark-operator-) into our code. Although C# offered LINQ expressions, they allocated new objects, which increased garbage collection and hindered performance—significant concerns in game development. Our experience with `[LazyProperty]` led us to explore code rewriting, ultimately giving birth to the first macros.
+In our codebase, we utilized the `Either` type to avoid [problems with using exceptions for control flow](https://wiki.c2.com/?DontUseExceptionsForFlowControl) (similar to [Rust's `Result`](https://doc.rust-lang.org/std/result/)) and wondered if we could incorporate something like the [`?` operator](https://doc.rust-lang.org/std/result/#the-question-mark-operator-) into our code. Although C# offered LINQ expressions, they allocated new objects, which increased garbage collection and hindered performance—significant concerns in game development. Our experience with `[LazyProperty]` led us to explore code rewriting, leading us to create our first macros.
 
 We continued to innovate, introducing ergonomic log statements that didn't allocate objects when the log level was off. During a code migration, we identified the need for logic in our macros, giving rise to scriban-based macros.
 
@@ -49,3 +49,13 @@ Over time, we found that some macros had become increasingly complex, making the
 After over seven years of rigorous testing and using the compiler ourselves, we're excited to share ExtendedCS with the world, granting you access to the same productivity-enhancing tools we've enjoyed.
 
 With love, the ExtendedCS team.
+
+## Next Steps
+
+Wondering what's next?
+
+- [Get onto the waitlist](https://forms.gle/FhTyufPHK9nu4Bkk8) to get early access to ExtendedCS.
+- Reach out to us via [Discord](https://discord.gg/G3gMzSVD3k) or [Twitter](https://twitter.com/arturaz_/) to share your thoughts and ask questions.
+- And read more about ExtendedCS, starting with [where ExtendedCS works](./supported-targets.md).
+
+Enjoy your journey towards more productive coding!
