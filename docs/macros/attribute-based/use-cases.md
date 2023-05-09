@@ -70,6 +70,50 @@ And then you can invoke it:
 var weaponStatePtr = c->CharacterEF->inventory.inHandsPtr()
 ```
 
+Another example of this is giving C# the [`?` operator from Rust](https://doc.rust-lang.org/std/result/#the-question-mark-operator-).
+
+```cs
+public static class EitherExts {
+  /// <summary>
+  /// Uses a macro to rewrite code so it:
+  /// <list type="bullet">
+  /// <item>
+  ///   If the <see cref="Either{A,B}"/> is `Right`, assigns the value
+  ///   in `Right` to the `var`.
+  /// </item>
+  /// <item>
+  ///   If the <see cref="Either{A,B}"/> is `Left`, return value in 
+  ///   `Left` from the scope.
+  /// </item>
+  /// </list>
+  /// This method is useful when you need this specific pattern because the resulting code 
+  /// after macro rewrite is very fast imperative code. 
+  /// </summary>
+  [VarMacro(@"
+    var {{ uniqueId }} = {{ either }};
+    if (!{{ uniqueId }}.rightValueOut(out {{ varType }} {{ varName }})) 
+      return {{ uniqueId }}.__unsafeGetLeft;"
+  )]
+  public static B rightOr_RETURN<A, B>(this Either<A, B> either) => 
+    throw new MacroException();
+}
+```
+
+Which is then usable like this:
+```cs
+public string getString(Either<string, int> either) {
+  // Will return the `string` in the `Left` side if the `Either` is a `Left`.
+  var someInt = either.rightOr_RETURN();
+  return someInt.ToString();
+}
+
+// `getString` is equivalent to this method:
+public string getStringImperative(Either<string, int> either) {
+  if (!either.rightValueOut(out var someInt)) return either.__unsafeGetLeft;
+  return someInt.ToString();
+}
+```
+
 ## Providing great developer experience while retaining performance of imperative code
 
 `inline` allows us to have nice anonymous-function based APIs which are then compiled down to imperative code and the cost of closure allocation and virtual delegate dispatch are eliminated.
